@@ -18,24 +18,6 @@ type Registers struct {
 	l uint8
 }
 
-// The "f" register is a special register called the "flags" register.
-// The lower four bits of the register are always 0s and the CPU
-// automatically writes to the upper four bits when certain things happen.
-// In other words, the CPU "flags" certain states.
-//    ┌-> Carry
-//  ┌-+> Subtraction
-//  | |
-// 1111 0000
-// | |
-// └-+> Zero
-//   └-> Half Carry
-type FlagsRegister struct {
-	zero      bool
-	subtract  bool
-	halfCarry bool
-	carry     bool
-}
-
 // While the CPU only has 8 bit registers, there are instructions that allow
 // the game to read and write 16 bits (i.e. 2 bytes) at the same time.
 // Therefore, we'll need the ability to read an write these "virtual" 16 bit registers.
@@ -78,7 +60,6 @@ func (r *Registers) getAF() uint16 {
 }
 
 func (r *Registers) setAF(value uint16) {
-
 	r.a = uint8((value & 0xFF00) >> 8)
 	r.f = uint8(value & 0x00FF)
 }
@@ -97,6 +78,10 @@ func main() {
 	fmt.Printf("%8b\n", r.b)
 	fmt.Printf("%8b\n", r.c)
 	fmt.Printf("%16b\n", r.getBC())
+
+	var i uint8 = 1
+	fmt.Printf("%8b\n", i)
+	fmt.Printf("%8b\n", i<<7)
 
 	fmt.Println("EXITED")
 }
