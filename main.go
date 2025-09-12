@@ -18,30 +18,39 @@ type Registers struct {
 	l uint8
 }
 
+// The "f" register is a special register called the "flags" register.
+// The lower four bits of the register are always 0s and the CPU
+// automatically writes to the upper four bits when certain things happen.
+// In other words, the CPU "flags" certain states.
+//    ┌-> Carry
+//  ┌-+> Subtraction
+//  | |
+// 1111 0000
+// | |
+// └-+> Zero
+//   └-> Half Carry
+type FlagsRegister struct {
+	zero      bool
+	subtract  bool
+	halfCarry bool
+	carry     bool
+}
+
 // While the CPU only has 8 bit registers, there are instructions that allow
 // the game to read and write 16 bits (i.e. 2 bytes) at the same time.
 // Therefore, we'll need the ability to read an write these "virtual" 16 bit registers.
 // The virtual registers are the following combinations: "af", "bc", "de", "hl"
-func (r *Registers) getAF() uint16 {
-	// Shift over register "a" to the left by 8 bits
-	// Then "append" register "f" to the end using bitwise OR
-	return uint16(r.a)<<8 | uint16(r.f)
-}
-
-func (r *Registers) setAF(value uint16) {
-	// Mask the first byte and shift it right 8 places, preserving the first byte in register "a"
-	r.a = uint8((value & 0xFF00) >> 8)
-
-	// Mask the second byte to convert and preserve it to 8bits
-	r.f = uint8(value & 0x00FF)
-}
-
 func (r *Registers) getBC() uint16 {
+	// Shift over register "b" to the left by 8 bits
+	// Then "append" register "c" to the end using bitwise OR
 	return uint16(r.b)<<8 | uint16(r.c)
 }
 
 func (r *Registers) setBC(value uint16) {
+	// Mask the first byte and shift it right 8 places, preserving the first byte in register "b"
 	r.b = uint8((value & 0xFF00) >> 8)
+
+	// Mask the second byte to convert and preserve it to 8bits
 	r.c = uint8(value & 0x00FF)
 }
 
@@ -61,6 +70,17 @@ func (r *Registers) setHL(value uint16) {
 
 func (r *Registers) getHL() uint16 {
 	return uint16(r.h)<<8 | uint16(r.h)
+}
+
+// TODO - Need an implementation for this based on flags register implementation
+func (r *Registers) getAF() uint16 {
+	return uint16(r.a)<<8 | uint16(r.f)
+}
+
+func (r *Registers) setAF(value uint16) {
+
+	r.a = uint8((value & 0xFF00) >> 8)
+	r.f = uint8(value & 0x00FF)
 }
 
 func main() {
